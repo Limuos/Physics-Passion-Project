@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Physics Passion Project" />
+  <title>Physics Passion Project</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Gentium+Book+Plus:wght@400;700&family=Lora:wght@400;500;600&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ============================================================
+       EASY SETTINGS: change these to restyle the whole site
+       ============================================================ */
+    :root {
+      --nav-bg: #1c1c1c;          /* top bar */
+      --nav-text: #ffffff;        /* nav link color */
+      --accent: #f4a6c0;          /* active / hovered nav link */
+      --footer-bg: #f0605d;       /* coral footer bar */
+      --page-bg: #ffffff;
+      --card-bg: #fafafa;
+      --text: #222222;
+      --muted: #666666;
+      --font-heading: 'Lora', Georgia, serif;
+      --font-body: 'Gentium Book Plus', Georgia, serif;
+    }
+
+    /* ============================================================
+       Everything below is the actual styling
+       ============================================================ */
+    *, *::before, *::after { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background: var(--page-bg);
+      color: var(--text);
+      font-family: var(--font-body);
+      font-size: 1.125rem;
+      line-height: 1.8;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+    h1, h2, h3 { font-family: var(--font-heading); font-weight: 500; line-height: 1.25; }
+    a { color: inherit; }
+    img { max-width: 100%; display: block; }
+
+    :focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+
+    .skip-link {
+      position: absolute; left: 1rem; top: -4rem;
+      background: #fff; color: #000; padding: .6rem 1rem; z-index: 100; border-radius: 6px;
+    }
+    .skip-link:focus { top: 1rem; }
+
+    /* ---------- Top navigation ---------- */
+    .site-nav {
+      position: sticky; top: 0; z-index: 50;
+      background: var(--nav-bg);
+      color: var(--nav-text);
+    }
+    .nav-inner {
+      max-width: 1200px; margin: 0 auto;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 1.5rem; min-height: 72px;
+    }
+    .brand {
+      font-family: var(--font-heading);
+      font-size: 1.6rem; font-weight: 500;
+      color: var(--nav-text); text-decoration: none;
+    }
+    .nav-links {
+      list-style: none; margin: 0; padding: 0;
+      display: flex; gap: 2rem;
+    }
+    .nav-links a {
+      font-family: var(--font-heading);
+      font-size: 1.15rem;
+      color: var(--nav-text); text-decoration: none;
+      padding: .4rem 0;
+      border-bottom: 2px solid transparent;
+      transition: color .2s, border-color .2s;
+    }
+    .nav-links a:hover,
+    .nav-links a.active { color: var(--accent); }
+    .nav-links a.active { border-bottom-color: var(--accent); }
+
+    .menu-btn {
+      display: none;
+      background: none; border: 0; color: var(--nav-text);
+      padding: .5rem; cursor: pointer; border-radius: 6px;
+    }
+    .menu-btn svg { width: 28px; height: 28px; display: block; }
+
+    @media (max-width: 860px) {
+      .menu-btn { display: block; }
+      .nav-links {
+        display: none;
+        position: absolute; left: 0; right: 0; top: 100%;
+        flex-direction: column; gap: 0;
+        background: var(--nav-bg);
+        border-top: 1px solid #333;
+        padding: .5rem 1.5rem 1rem;
+      }
+      .nav-links.open { display: flex; }
+      .nav-links a { display: block; padding: .8rem 0; border-bottom: 0; }
+    }
+
+    /* ---------- Page content ---------- */
+    main {
+      flex: 1;
+      width: 100%; max-width: 1150px; margin: 0 auto;
+      padding: 3rem 1.25rem 4rem;
+    }
+    main:focus { outline: none; }
+    .page { display: none; }
+    .page.active { display: block; }
+
+    .page-title { text-align: center; font-size: clamp(2rem, 5vw, 3rem); margin: 0 0 .5rem; }
+    .lead { text-align: center; color: var(--muted); font-size: 1.3rem; max-width: 40rem; margin: 0 auto 2.5rem; }
+    .meta { text-align: center; color: var(--muted); margin: 0 0 2rem; font-size: 1rem; }
+
+    /* Three-card row on the homepage */
+    .cards {
+      list-style: none; padding: 0; margin: 0;
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem;
+    }
+    @media (max-width: 860px) { .cards { grid-template-columns: 1fr; max-width: 32rem; margin: 0 auto; } }
+
+    .card { background: var(--card-bg); }
+    .card img { width: 100%; height: 224px; object-fit: cover; }
+    .card h2 { text-align: center; font-size: 2rem; margin: 1.5rem 0 1rem; }
+    .card p { text-align: center; margin: 0; padding: 0 1.5rem 2rem; }
+    .card a.card-link { text-decoration: none; }
+    .card a.card-link:hover h2 { color: #c2415f; }
+
+    .future {
+      margin-top: 3rem;
+      border: 2px dashed #ccc; border-radius: 12px;
+      padding: 1.5rem; text-align: center; color: var(--muted);
+    }
+    .future h2 { margin-top: 0; color: var(--text); }
+
+    /* Post pages */
+    .prose { max-width: 44rem; margin: 0 auto; }
+    .prose h2 { font-size: 1.8rem; margin: 2.2rem 0 .5rem; }
+    .prose figure { margin: 2rem 0; }
+    .prose figure img { width: 100%; border-radius: 6px; }
+    .prose figcaption { text-align: center; color: var(--muted); font-size: 1rem; margin-top: .5rem; }
+
+    /* ---------- Footer ---------- */
+    .site-footer {
+      background: var(--footer-bg); color: #fff;
+      text-align: center; padding: 1.75rem 1rem; font-size: 1rem;
+    }
+    .site-footer p { margin: 0; }
+
+    /* ---------- Back to top button ---------- */
+    .to-top {
+      position: fixed; right: 1.25rem; bottom: 1.25rem;
+      width: 52px; height: 52px; border-radius: 50%;
+      border: 0; cursor: pointer;
+      background: rgba(40, 40, 40, .85); color: #fff;
+      display: none; align-items: center; justify-content: center;
+    }
+    .to-top.show { display: flex; }
+    .to-top svg { width: 26px; height: 26px; }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      * { transition: none !important; }
+    }
+  </style>
+</head>
+
+<body>
+  <a class="skip-link" href="#main">Skip to main content</a>
+
+  <!-- ===================== NAVIGATION =====================
+       To rename a tab, change the text here AND the data-title on its page below.
+       Each href (#post-1) must match the id of a <section> further down. -->
+  <header class="site-nav">
+    <div class="nav-inner">
+      <a class="brand" href="#home" data-link>Physics Passion Project</a>
+
+      <button class="menu-btn" id="menu-btn" aria-label="Open menu" aria-expanded="false" aria-controls="nav-links">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+      </button>
+
+      <nav aria-label="Main">
+        <ul class="nav-links" id="nav-links">
+          <li><a href="#home" data-link>Home</a></li>
+          <li><a href="#post-1" data-link>Post 1</a></li>
+          <li><a href="#post-2" data-link>Post 2</a></li>
+          <li><a href="#post-3" data-link>Post 3</a></li>
+          <li><a href="#post-4" data-link>Post 4</a></li>
+          <li><a href="#post-5" data-link>Post 5</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main" tabindex="-1">
+
+    <!-- ===================== HOME ===================== -->
+    <section class="page active" id="home" data-title="Home">
+      <h1 class="page-title">Physics Passion Project</h1>
+      <p class="lead">A short sentence about what this project is. Replace me!</p>
+
+      <!-- Three cards: copy one whole <li>...</li> block to add another -->
+      <ul class="cards">
+        <li class="card">
+          <a class="card-link" href="#post-1" data-link>
+            <img src="https://picsum.photos/seed/ppp-a/800/500" alt="Placeholder image" loading="lazy" />
+            <h2>Idea One</h2>
+          </a>
+          <p>Write a short summary here about your first idea or topic. A few sentences works well: what it is and why it interests you.</p>
+        </li>
+        <li class="card">
+          <a class="card-link" href="#post-2" data-link>
+            <img src="https://picsum.photos/seed/ppp-b/800/500" alt="Placeholder image" loading="lazy" />
+            <h2>Idea Two</h2>
+          </a>
+          <p>Write a short summary here about your second idea or topic. A few sentences works well: what it is and why it interests you.</p>
+        </li>
+        <li class="card">
+          <a class="card-link" href="#post-3" data-link>
+            <img src="https://picsum.photos/seed/ppp-c/800/500" alt="Placeholder image" loading="lazy" />
+            <h2>Idea Three</h2>
+          </a>
+          <p>Write a short summary here about your third idea or topic. A few sentences works well: what it is and why it interests you.</p>
+        </li>
+      </ul>
+
+      <!-- Space for future information: edit or delete -->
+      <div class="future">
+        <h2>More coming soon</h2>
+        <p>This space is saved for future updates, goals, or anything else you want on your homepage.</p>
+      </div>
+    </section>
+
+    <!-- ===================== POST 1 ===================== -->
+    <section class="page" id="post-1" data-title="Post 1">
+      <h1 class="page-title">Post 1</h1>
+      <p class="meta">Posted: Month DD, YYYY</p>
+      <div class="prose">
+        <h2>Heading goes here</h2>
+        <p>Write your first post here. Replace this text with your own.</p>
+
+        <!-- To use your own image: put it in the same folder as index.html
+             and change src to its file name, e.g. src="my-photo.jpg" -->
+        <figure>
+          <img src="https://picsum.photos/seed/ppp-p1/1000/560" alt="Describe the image here" loading="lazy" />
+          <figcaption>A short caption.</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <!-- ===================== POST 2 ===================== -->
+    <section class="page" id="post-2" data-title="Post 2">
+      <h1 class="page-title">Post 2</h1>
+      <p class="meta">Posted: Month DD, YYYY</p>
+      <div class="prose">
+        <h2>Heading goes here</h2>
+        <p>Write your second post here. Replace this text with your own.</p>
+      </div>
+    </section>
+
+    <!-- ===================== POST 3 ===================== -->
+    <section class="page" id="post-3" data-title="Post 3">
+      <h1 class="page-title">Post 3</h1>
+      <p class="meta">Posted: Month DD, YYYY</p>
+      <div class="prose">
+        <h2>Heading goes here</h2>
+        <p>Write your third post here. Replace this text with your own.</p>
+      </div>
+    </section>
+
+    <!-- ===================== POST 4 ===================== -->
+    <section class="page" id="post-4" data-title="Post 4">
+      <h1 class="page-title">Post 4</h1>
+      <p class="meta">Posted: Month DD, YYYY</p>
+      <div class="prose">
+        <h2>Heading goes here</h2>
+        <p>Write your fourth post here. Replace this text with your own.</p>
+      </div>
+    </section>
+
+    <!-- ===================== POST 5 ===================== -->
+    <section class="page" id="post-5" data-title="Post 5">
+      <h1 class="page-title">Post 5</h1>
+      <p class="meta">Posted: Month DD, YYYY</p>
+      <div class="prose">
+        <h2>Heading goes here</h2>
+        <p>Write your fifth post here. Replace this text with your own.</p>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <p>&copy; 2026 Your Name &middot; Physics Passion Project</p>
+  </footer>
+
+  <button class="to-top" id="to-top" aria-label="Back to top">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 15l6-6 6 6"/></svg>
+  </button>
+
+  <script>
+    // Tab switching: shows the section whose id matches the URL hash (#post-1, etc.)
+    (function () {
+      var pages = Array.prototype.slice.call(document.querySelectorAll('.page'));
+      var links = Array.prototype.slice.call(document.querySelectorAll('[data-link]'));
+      var menuBtn = document.getElementById('menu-btn');
+      var navLinks = document.getElementById('nav-links');
+      var main = document.getElementById('main');
+      var toTop = document.getElementById('to-top');
+
+      function closeMenu() {
+        navLinks.classList.remove('open');
+        menuBtn.setAttribute('aria-expanded', 'false');
+      }
+
+      function show() {
+        var id = location.hash.slice(1) || 'home';
+        var target = document.getElementById(id);
+        if (!target || pages.indexOf(target) === -1) id = 'home';
+
+        pages.forEach(function (p) { p.classList.toggle('active', p.id === id); });
+        links.forEach(function (a) {
+          var on = a.getAttribute('href') === '#' + id;
+          a.classList.toggle('active', on);
+          if (on) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
+        });
+
+        var title = document.getElementById(id).getAttribute('data-title');
+        document.title = (id === 'home' ? '' : title + ' \u00b7 ') + 'Physics Passion Project';
+
+        closeMenu();
+        window.scrollTo(0, 0);
+        main.focus({ preventScroll: true });
+      }
+
+      window.addEventListener('hashchange', show);
+      show();
+
+      menuBtn.addEventListener('click', function () {
+        var open = navLinks.classList.toggle('open');
+        menuBtn.setAttribute('aria-expanded', String(open));
+      });
+
+      window.addEventListener('scroll', function () {
+        toTop.classList.toggle('show', window.scrollY > 300);
+      }, { passive: true });
+      toTop.addEventListener('click', function () { window.scrollTo({ top: 0 }); });
+
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') closeMenu();
+      });
+    })();
+  </script>
+</body>
+</html>
