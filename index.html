@@ -378,6 +378,185 @@
       .mm-panel { padding: 1.75rem 1rem; }
     }
 
+    /* ================= Post 2: Project Timeline (Gantt) ================= */
+    .tl { max-width: 1150px; margin: 0 auto; }
+    .tl-intro { text-align: center; color: var(--muted); max-width: 40rem; margin: 0 auto 2.25rem; }
+
+    /* Summary cards */
+    .tl-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 1.1rem; margin-bottom: 1.75rem; }
+    .stat {
+      position: relative; overflow: hidden; border-radius: 16px; padding: 1.1rem 1.35rem 1.2rem;
+      color: #fff; background: linear-gradient(135deg, var(--footer-bg), #e07a95);
+      box-shadow: 0 12px 26px -16px rgba(0,0,0,.6);
+    }
+    .stat:nth-child(2) { background: linear-gradient(135deg, #1c1c1c, #4a3a44); }
+    .stat:nth-child(3) { background: linear-gradient(135deg, #f4a6c0, #d98bb0); color: #1c1c1c; }
+    .stat:nth-child(4) { background: linear-gradient(135deg, #7fc4e6, #a6d8ef); color: #1c1c1c; }
+    .stat .k { font-family: var(--font-heading); font-size: .78rem; letter-spacing: .2em; text-transform: uppercase; opacity: .85; margin: 0 0 .15rem; }
+    .stat .v { font-family: var(--font-heading); font-size: 2.1rem; font-weight: 600; line-height: 1.15; margin: 0; }
+    .stat .s { font-size: .98rem; line-height: 1.4; margin: .2rem 0 0; opacity: .92; }
+    .stat .meter { height: 7px; border-radius: 999px; background: rgba(255,255,255,.3); margin-top: .7rem; overflow: hidden; }
+    .stat .meter i { display: block; height: 100%; border-radius: 999px; background: #fff; transition: width .5s ease; }
+    .stat:nth-child(3) .meter { background: rgba(28,28,28,.15); }
+    .stat:nth-child(3) .meter i { background: #1c1c1c; }
+
+    /* Toolbar */
+    .tl-bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .9rem 1.5rem; margin-bottom: 1rem; }
+    .legend { display: flex; flex-wrap: wrap; gap: .45rem 1.1rem; font-size: .98rem; color: #444; }
+    .legend span { display: inline-flex; align-items: center; gap: .45rem; }
+    .legend i { width: .85rem; height: .85rem; border-radius: 50%; display: inline-block; background: var(--c); }
+    .tl-actions { display: flex; flex-wrap: wrap; align-items: center; gap: .6rem; }
+    .btn {
+      font-family: var(--font-heading); font-size: .95rem; font-weight: 500; cursor: pointer;
+      border: 2px solid #1c1c1c; background: #fff; color: #1c1c1c;
+      padding: .35rem 1rem; border-radius: 999px; line-height: 1.5;
+      transition: background .2s, color .2s, transform .2s;
+    }
+    .btn:hover { background: #1c1c1c; color: #fff; }
+    .btn.primary { background: var(--footer-bg); border-color: var(--footer-bg); color: #fff; }
+    .btn.primary:hover { background: #d94c49; border-color: #d94c49; }
+    .btn.danger { border-color: #b3261e; color: #b3261e; }
+    .btn.danger:hover { background: #b3261e; color: #fff; }
+    .edit-only { display: none; }
+    .tl.editing .edit-only { display: inline-block; }
+
+    .switch { display: inline-flex; align-items: center; gap: .6rem; cursor: pointer; font-family: var(--font-heading); font-size: .95rem; user-select: none; }
+    .switch input { position: absolute; opacity: 0; width: 0; height: 0; }
+    .switch .tg { width: 46px; height: 26px; border-radius: 999px; background: #cfcfcf; position: relative; transition: background .2s; flex: none; }
+    .switch .tg::after { content: ""; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.35); transition: transform .2s; }
+    .switch input:checked + .tg { background: var(--footer-bg); }
+    .switch input:checked + .tg::after { transform: translateX(20px); }
+    .switch input:focus-visible + .tg { outline: 3px solid var(--accent); outline-offset: 3px; }
+
+    .tl-note { font-size: .95rem; color: var(--muted); text-align: center; margin: 1rem auto 0; max-width: 46rem; line-height: 1.6; }
+    .tl-note[hidden] { display: none; }
+
+    /* Chart shell */
+    .gantt-wrap {
+      border-radius: 20px; overflow: hidden; background: #fff;
+      border: 1px solid rgba(0,0,0,.08);
+      box-shadow: 0 2px 4px rgba(0,0,0,.05), 0 18px 40px -22px rgba(0,0,0,.4);
+    }
+    .gantt-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    .gantt { --lw: 260px; --dw: 36px; position: relative; min-width: calc(var(--lw) + var(--days) * var(--dw)); }
+
+    .g-head { display: grid; grid-template-columns: var(--lw) 1fr; background: #1c1c1c; color: #fff; }
+    .g-corner {
+      position: sticky; left: 0; z-index: 6; background: #1c1c1c;
+      padding: 0 1rem; display: flex; align-items: flex-end; padding-bottom: .55rem;
+      font-family: var(--font-heading); font-size: .8rem; letter-spacing: .2em; text-transform: uppercase; color: var(--accent);
+      border-right: 1px solid #333;
+    }
+    .g-weeks, .g-days { display: grid; }
+    .g-weeks { grid-template-columns: repeat(var(--weeks), 1fr); }
+    .g-days  { grid-template-columns: repeat(var(--days), 1fr); }
+    .g-wk {
+      padding: .45rem .7rem; font-family: var(--font-heading); font-size: .9rem; letter-spacing: .04em;
+      border-left: 1px solid #3a3a3a; border-bottom: 1px solid #3a3a3a; white-space: nowrap;
+    }
+    .g-day { text-align: center; padding: .3rem 0 .4rem; line-height: 1.2; border-left: 1px solid #2f2f2f; font-family: var(--font-heading); }
+    .g-day small { display: block; font-size: .68rem; opacity: .6; letter-spacing: .06em; }
+    .g-day b { font-size: .92rem; font-weight: 500; }
+    .g-day.wk { background: #262626; }
+    .g-day.today { background: var(--footer-bg); }
+    .g-day.today small { opacity: .95; }
+
+    .g-body { position: relative; }
+    .g-grid {
+      position: absolute; top: 0; bottom: 0; left: var(--lw); right: 0; z-index: 0; pointer-events: none;
+      display: grid; grid-template-columns: repeat(var(--days), 1fr);
+    }
+    .g-grid div { border-left: 1px solid rgba(0,0,0,.06); }
+    .g-grid div.wk { background: rgba(28,28,28,.04); }
+    .g-grid div.today { background: rgba(240,96,93,.09); }
+    .g-todayline { position: absolute; top: 0; bottom: 0; width: 0; border-left: 2px dashed var(--footer-bg); z-index: 2; }
+    .g-todayline::before {
+      content: "Today"; position: absolute; top: 4px; left: 6px; font-family: var(--font-heading); font-size: .68rem;
+      letter-spacing: .12em; text-transform: uppercase; color: #fff; background: var(--footer-bg);
+      padding: 0 .5rem; border-radius: 999px; line-height: 1.6;
+    }
+
+    .g-row {
+      position: relative; z-index: 1; display: grid; grid-template-columns: var(--lw) 1fr;
+      min-height: 54px; border-bottom: 1px solid rgba(0,0,0,.06);
+    }
+    .g-label {
+      position: sticky; left: 0; z-index: 4; background: #fff; border-right: 1px solid rgba(0,0,0,.08);
+      padding: .5rem 1rem; display: flex; flex-direction: column; justify-content: center; gap: .1rem;
+    }
+    .g-label .nm { font-family: var(--font-heading); font-size: .98rem; line-height: 1.3; font-weight: 500; color: #111; }
+    .g-label .sub { display: flex; align-items: center; gap: .5rem; font-size: .85rem; color: var(--muted); line-height: 1.4; }
+    .chip {
+      font-family: var(--font-heading); font-size: .66rem; letter-spacing: .1em; text-transform: uppercase;
+      padding: 0 .55rem; border-radius: 999px; line-height: 1.7; background: #eee; color: #444; white-space: nowrap;
+    }
+    .chip.done { background: #d8f2e0; color: #17623a; }
+    .chip.active { background: #ffe1ec; color: #a8325a; }
+    .chip.next { background: #dff1fb; color: #1d5f85; }
+    .chip.late { background: #fde0de; color: #b3261e; }
+
+    .g-row.phase { min-height: 36px; background: var(--tint, #fafafa); }
+    .g-row.phase .g-label {
+      background: var(--tint-solid, #fafafa); flex-direction: row; align-items: center; gap: .6rem;
+      font-family: var(--font-heading); font-size: .8rem; letter-spacing: .18em; text-transform: uppercase; color: #111; font-weight: 600;
+    }
+    .g-row.phase .g-label i { width: .8rem; height: .8rem; border-radius: 50%; background: var(--c); flex: none; }
+    .g-row.phase .g-track { background: transparent; }
+
+    .g-track { position: relative; min-height: 54px; }
+    .g-bar {
+      --c: var(--footer-bg);
+      position: absolute; top: 12px; height: 30px; border-radius: 999px; padding: 0; cursor: default;
+      background: color-mix(in srgb, var(--c) 22%, #fff); border: 2px solid var(--c);
+      overflow: hidden; display: block; font: inherit; text-align: left;
+      transition: transform .2s ease, box-shadow .2s ease;
+      box-shadow: 0 4px 10px -6px rgba(0,0,0,.45);
+    }
+    .g-bar .fill { position: absolute; left: 0; top: 0; bottom: 0; background: var(--c); transition: width .5s ease; }
+    .g-bar .txt {
+      position: relative; z-index: 1; display: block; padding: 0 .7rem; line-height: 26px; font-family: var(--font-heading);
+      font-size: .78rem; font-weight: 600; white-space: nowrap; color: #111; mix-blend-mode: normal;
+    }
+    .g-bar.light-fill .txt { color: #111; }
+    .tl.editing .g-bar { cursor: pointer; }
+    .tl.editing .g-bar:hover, .tl.editing .g-bar:focus-visible { transform: translateY(-2px); box-shadow: 0 10px 18px -8px rgba(0,0,0,.5); }
+    .g-bar.done { border-style: solid; }
+    .g-bar.done::after { content: "\2713"; position: absolute; right: .55rem; top: 0; line-height: 26px; font-size: .85rem; font-weight: 700; color: #fff; z-index: 2; }
+
+    .g-empty { padding: 2.5rem 1rem; text-align: center; color: var(--muted); }
+
+    /* Edit dialog */
+    dialog.edit {
+      border: 0; border-radius: 18px; padding: 0; width: min(94vw, 460px);
+      box-shadow: 0 30px 60px -20px rgba(0,0,0,.55); font-family: var(--font-body); color: var(--text);
+    }
+    dialog.edit::backdrop { background: rgba(20,20,20,.55); backdrop-filter: blur(2px); }
+    .edit-head { background: linear-gradient(135deg, #1c1c1c, #4a3a44); color: #fff; padding: 1rem 1.4rem; border-bottom: 4px solid var(--footer-bg); }
+    .edit-head h3 { margin: 0; font-size: 1.35rem; }
+    .edit-form { padding: 1.2rem 1.4rem 1.4rem; display: grid; gap: .9rem; }
+    .field { display: grid; gap: .25rem; }
+    .field label { font-family: var(--font-heading); font-size: .82rem; letter-spacing: .12em; text-transform: uppercase; color: #555; }
+    .field input[type="text"], .field input[type="date"], .field select {
+      font: inherit; font-size: 1rem; padding: .5rem .75rem; border: 2px solid #ddd; border-radius: 10px; background: #fff; color: #111; width: 100%;
+    }
+    .field input:focus, .field select:focus { border-color: var(--footer-bg); outline: none; }
+    .two { display: grid; grid-template-columns: 1fr 1fr; gap: .8rem; }
+    .range-line { display: flex; align-items: center; gap: .9rem; }
+    .range-line input[type="range"] { flex: 1; accent-color: var(--footer-bg); }
+    .range-line output { font-family: var(--font-heading); font-weight: 600; min-width: 3.2rem; text-align: right; }
+    .quick { display: flex; gap: .4rem; flex-wrap: wrap; }
+    .quick button { font-family: var(--font-heading); font-size: .8rem; border: 1.5px solid #ccc; background: #fff; border-radius: 999px; padding: .1rem .7rem; cursor: pointer; }
+    .quick button:hover { border-color: var(--footer-bg); color: var(--footer-bg); }
+    .edit-err { color: #b3261e; font-size: .92rem; min-height: 1.2em; margin: 0; }
+    .edit-btns { display: flex; justify-content: space-between; gap: .6rem; flex-wrap: wrap; }
+    .edit-btns .r { display: flex; gap: .6rem; margin-left: auto; }
+
+    @media (max-width: 700px) {
+      .gantt { --lw: 190px; --dw: 32px; }
+      .g-label { padding: .45rem .7rem; }
+      .g-label .nm { font-size: .9rem; }
+    }
+
     /* ---------- Footer ---------- */
     .site-footer {
       background: var(--footer-bg); color: #fff;
@@ -994,13 +1173,38 @@
       </div>
     </section>
 
-    <!-- ===================== POST 2 ===================== -->
+    <!-- ===================== POST 2: PROJECT TIMELINE ===================== -->
     <section class="page" id="post-2" data-title="Post 2">
+      <p class="eyebrow">Project Timeline</p>
       <h1 class="page-title">Post 2</h1>
       <p class="meta">Posted: Month DD, YYYY</p>
-      <div class="prose">
-        <h2>Heading goes here</h2>
-        <p>Write your second post here. Replace this text with your own.</p>
+
+      <div class="tl" id="tl">
+        <p class="tl-intro">Our plan from now until the pre-deadline, task by task. The lighter bar is the planned window and the solid colour shows how much is actually done.</p>
+
+        <div class="tl-stats" id="tl-stats" aria-live="polite"></div>
+
+        <div class="tl-bar">
+          <div class="legend" id="tl-legend" aria-label="Phase colours"></div>
+          <div class="tl-actions">
+            <button class="btn edit-only primary" id="tl-add" type="button">+ Add task</button>
+            <button class="btn edit-only" id="tl-export" type="button">Copy data</button>
+            <button class="btn edit-only danger" id="tl-reset" type="button">Reset</button>
+            <label class="switch">
+              <input type="checkbox" id="tl-edit" />
+              <span class="tg" aria-hidden="true"></span>
+              <span>Edit mode</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="gantt-wrap">
+          <div class="gantt-scroll">
+            <div class="gantt" id="gantt" role="table" aria-label="Project timeline"></div>
+          </div>
+        </div>
+
+        <p class="tl-note edit-only" id="tl-note">Click any bar to change its dates or progress. Edits are saved in this browser only. To make them show for everyone, press &ldquo;Copy data&rdquo; and paste it over <code>DEFAULT_TASKS</code> in the code.</p>
       </div>
     </section>
 
@@ -1043,6 +1247,53 @@
   <button class="to-top" id="to-top" aria-label="Back to top">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 15l6-6 6 6"/></svg>
   </button>
+
+  <!-- Edit dialog for the timeline -->
+  <dialog class="edit" id="tl-dialog">
+    <div class="edit-head"><h3 id="tl-dialog-title">Edit task</h3></div>
+    <form class="edit-form" id="tl-form" method="dialog" novalidate>
+      <div class="field">
+        <label for="f-name">Task</label>
+        <input type="text" id="f-name" maxlength="90" required />
+      </div>
+      <div class="field">
+        <label for="f-phase">Phase</label>
+        <select id="f-phase"></select>
+      </div>
+      <div class="two">
+        <div class="field">
+          <label for="f-start">Start</label>
+          <input type="date" id="f-start" required />
+        </div>
+        <div class="field">
+          <label for="f-end">End</label>
+          <input type="date" id="f-end" required />
+        </div>
+      </div>
+      <div class="field">
+        <label for="f-pct">Progress</label>
+        <div class="range-line">
+          <input type="range" id="f-pct" min="0" max="100" step="5" value="0" />
+          <output id="f-pct-out" for="f-pct">0%</output>
+        </div>
+        <div class="quick">
+          <button type="button" data-pct="0">0%</button>
+          <button type="button" data-pct="25">25%</button>
+          <button type="button" data-pct="50">50%</button>
+          <button type="button" data-pct="75">75%</button>
+          <button type="button" data-pct="100">Done</button>
+        </div>
+      </div>
+      <p class="edit-err" id="f-err" role="alert"></p>
+      <div class="edit-btns">
+        <button type="button" class="btn danger" id="f-delete">Delete</button>
+        <div class="r">
+          <button type="button" class="btn" id="f-cancel">Cancel</button>
+          <button type="submit" class="btn primary" id="f-save">Save</button>
+        </div>
+      </div>
+    </form>
+  </dialog>
 
   <script>
     // Photo loader: tries several file extensions for each photo.
@@ -1114,6 +1365,384 @@
       document.addEventListener('keydown', function (e) {
         if (e.key === 'Escape') closeMenu();
       });
+    })();
+  </script>
+
+  <script>
+    // ============================================================
+    // POST 2: PROJECT TIMELINE (GANTT)
+    // ------------------------------------------------------------
+    // HOW TO UPDATE:
+    //  A) Quick way: turn on "Edit mode" on the page, click a bar, change
+    //     progress or dates. Saved in this browser only.
+    //  B) Permanent way (everyone sees it): edit DEFAULT_TASKS below.
+    //     Each task is { id, name, phase, start, end, pct }.
+    //     Dates are "YYYY-MM-DD", pct is 0 to 100.
+    //     Tip: "Copy data" in Edit mode gives you the up-to-date list to paste here.
+    //  Add a new colour by adding a phase to PHASES.
+    // ============================================================
+    (function () {
+      var STORE_KEY = 'ppp-gantt-v1';
+
+      var PHASES = [
+        { name: 'Research',        color: '#f0605d' },
+        { name: 'Decisions',       color: '#e07a95' },
+        { name: 'Design & Orders', color: '#7fc4e6' },
+        { name: 'Code',            color: '#4a3a44' },
+        { name: 'Write-ups',       color: '#f2b84b' }
+      ];
+
+      // The planned schedule (from the Google Sheet). Bars are placed by these dates.
+      var DEFAULT_TASKS = [
+        { id: 't1',  name: 'Relooking at Initial Driving Questions',        phase: 'Research',        start: '2026-11-16', end: '2026-11-18', pct: 0 },
+        { id: 't2',  name: 'Initial Math Research: Inverse Kinematics',     phase: 'Research',        start: '2026-11-16', end: '2026-11-24', pct: 0 },
+        { id: 't3',  name: 'Initial Research: Strings & Elastics for Hands', phase: 'Research',       start: '2026-11-17', end: '2026-11-25', pct: 0 },
+        { id: 't4',  name: 'Initial Research: Motor Choices for all hinges', phase: 'Research',       start: '2026-11-17', end: '2026-11-23', pct: 0 },
+
+        { id: 't5',  name: 'Decision: What motors power the arm',           phase: 'Decisions',       start: '2026-11-24', end: '2026-11-26', pct: 0 },
+        { id: 't6',  name: 'Decision: How to pull strings & which elastics', phase: 'Decisions',      start: '2026-11-26', end: '2026-11-28', pct: 0 },
+
+        { id: 't7',  name: 'First CAD Prototype of End Effector',           phase: 'Design & Orders', start: '2026-11-27', end: '2026-12-04', pct: 0 },
+        { id: 't8',  name: 'Motors Ordered',                                phase: 'Design & Orders', start: '2026-11-27', end: '2026-11-27', pct: 0 },
+        { id: 't9',  name: 'Fasteners, TPU, PLA, PETG Ordered',             phase: 'Design & Orders', start: '2026-11-30', end: '2026-11-30', pct: 0 },
+        { id: 't10', name: 'Wires and Chips Ordered',                       phase: 'Design & Orders', start: '2026-12-01', end: '2026-12-01', pct: 0 },
+
+        { id: 't11', name: 'Code for End Effector: Complete',               phase: 'Code',            start: '2026-12-02', end: '2026-12-08', pct: 0 },
+        { id: 't12', name: 'Code for End Effector: Tested',                 phase: 'Code',            start: '2026-12-08', end: '2026-12-11', pct: 0 },
+        { id: 't13', name: 'Code for Hand: Started',                        phase: 'Code',            start: '2026-12-11', end: '2026-12-18', pct: 0 },
+
+        { id: 't14', name: 'Write-up: Torque and Tension',                  phase: 'Write-ups',       start: '2026-12-07', end: '2026-12-11', pct: 0 },
+        { id: 't15', name: 'Write-up: Code and Applications of Code',       phase: 'Write-ups',       start: '2026-12-09', end: '2026-12-15', pct: 0 },
+        { id: 't16', name: 'Write-up: Motor Functions and Gearboxes',       phase: 'Write-ups',       start: '2026-12-10', end: '2026-12-16', pct: 0 },
+        { id: 't17', name: 'Write-up: Design Philosophy and Process',       phase: 'Write-ups',       start: '2026-12-12', end: '2026-12-18', pct: 0 }
+      ];
+
+      // ---------- helpers ----------
+      var DAY = 86400000;
+      var MON = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      var WD  = ['Su','Mo','Tu','We','Th','Fr','Sa'];
+
+      function pd(s) { var p = String(s).split('-'); return new Date(+p[0], +p[1] - 1, +p[2]); }
+      function iso(d) {
+        var m = d.getMonth() + 1, day = d.getDate();
+        return d.getFullYear() + '-' + (m < 10 ? '0' : '') + m + '-' + (day < 10 ? '0' : '') + day;
+      }
+      function diff(a, b) { return Math.round((b - a) / DAY); }
+      function addDays(d, n) { return new Date(d.getFullYear(), d.getMonth(), d.getDate() + n); }
+      function fmt(d) { return MON[d.getMonth()] + ' ' + d.getDate(); }
+      function el(tag, cls, text) {
+        var e = document.createElement(tag);
+        if (cls) e.className = cls;
+        if (text != null) e.textContent = text;
+        return e;
+      }
+      function today() { var n = new Date(); return new Date(n.getFullYear(), n.getMonth(), n.getDate()); }
+      function phaseColor(name) {
+        for (var i = 0; i < PHASES.length; i++) if (PHASES[i].name === name) return PHASES[i].color;
+        return '#888888';
+      }
+      function clone(o) { return JSON.parse(JSON.stringify(o)); }
+
+      // ---------- storage ----------
+      var tasks = clone(DEFAULT_TASKS);
+      try {
+        var saved = JSON.parse(localStorage.getItem(STORE_KEY) || 'null');
+        if (Array.isArray(saved) && saved.length) tasks = saved;
+      } catch (e) {}
+      function save() { try { localStorage.setItem(STORE_KEY, JSON.stringify(tasks)); } catch (e) {} }
+
+      // ---------- status ----------
+      function status(t, now) {
+        if (t.pct >= 100) return { key: 'done', label: 'Done' };
+        if (pd(t.end) < now) return { key: 'late', label: 'Overdue' };
+        if (t.pct > 0) return { key: 'active', label: 'In progress' };
+        if (pd(t.start) <= now) return { key: 'next', label: 'Up now' };
+        return { key: '', label: 'Upcoming' };
+      }
+
+      // ---------- DOM refs ----------
+      var root = document.getElementById('tl');
+      var gantt = document.getElementById('gantt');
+      var statsEl = document.getElementById('tl-stats');
+      var legendEl = document.getElementById('tl-legend');
+      var editToggle = document.getElementById('tl-edit');
+      var dlg = document.getElementById('tl-dialog');
+      var form = document.getElementById('tl-form');
+      var fName = document.getElementById('f-name');
+      var fPhase = document.getElementById('f-phase');
+      var fStart = document.getElementById('f-start');
+      var fEnd = document.getElementById('f-end');
+      var fPct = document.getElementById('f-pct');
+      var fPctOut = document.getElementById('f-pct-out');
+      var fErr = document.getElementById('f-err');
+      var fDelete = document.getElementById('f-delete');
+      var editingId = null;
+
+      // ---------- legend ----------
+      function renderLegend() {
+        legendEl.innerHTML = '';
+        PHASES.forEach(function (p) {
+          var s = el('span');
+          var i = el('i'); i.style.setProperty('--c', p.color);
+          s.appendChild(i); s.appendChild(document.createTextNode(p.name));
+          legendEl.appendChild(s);
+        });
+      }
+
+      // ---------- stats ----------
+      function card(k, v, s, pct) {
+        var c = el('div', 'stat');
+        c.appendChild(el('p', 'k', k));
+        c.appendChild(el('p', 'v', v));
+        c.appendChild(el('p', 's', s));
+        if (pct != null) {
+          var m = el('div', 'meter'); var b = el('i'); b.style.width = pct + '%';
+          m.appendChild(b); c.appendChild(m);
+        }
+        return c;
+      }
+      function renderStats(now) {
+        statsEl.innerHTML = '';
+        if (!tasks.length) return;
+        var total = 0, done = 0, late = 0;
+        tasks.forEach(function (t) {
+          total += t.pct;
+          if (t.pct >= 100) done++;
+          else if (pd(t.end) < now) late++;
+        });
+        var overall = Math.round(total / tasks.length);
+
+        var ends = tasks.map(function (t) { return pd(t.end); });
+        var deadline = new Date(Math.max.apply(null, ends));
+        var left = diff(now, deadline);
+        var leftTxt = left > 0 ? left + (left === 1 ? ' day' : ' days') : (left === 0 ? 'Today' : 'Passed');
+
+        var upcoming = tasks.filter(function (t) { return t.pct < 100; })
+          .sort(function (a, b) { return pd(a.start) - pd(b.start) || pd(a.end) - pd(b.end); })[0];
+
+        statsEl.appendChild(card('Overall progress', overall + '%', done + ' of ' + tasks.length + ' tasks complete', overall));
+        statsEl.appendChild(card('Time left', leftTxt, 'Until ' + fmt(deadline) + ' (pre-deadline)'));
+        statsEl.appendChild(card('Needs attention', String(late), late === 1 ? 'task past its planned end' : 'tasks past their planned end'));
+        statsEl.appendChild(card('Next up', upcoming ? upcoming.name : 'All done', upcoming ? fmt(pd(upcoming.start)) + ' to ' + fmt(pd(upcoming.end)) : 'Nothing left on the list'));
+        statsEl.lastChild.querySelector('.v').style.fontSize = '1.2rem';
+        statsEl.lastChild.querySelector('.v').style.lineHeight = '1.35';
+      }
+
+      // ---------- chart ----------
+      function render() {
+        var now = today();
+        renderStats(now);
+        gantt.innerHTML = '';
+
+        if (!tasks.length) {
+          gantt.style.minWidth = '0';
+          gantt.appendChild(el('div', 'g-empty', 'No tasks yet. Turn on Edit mode and press "+ Add task".'));
+          return;
+        }
+
+        // range: Monday on/before earliest start to Sunday on/after latest end
+        var starts = tasks.map(function (t) { return pd(t.start); });
+        var ends = tasks.map(function (t) { return pd(t.end); });
+        var min = new Date(Math.min.apply(null, starts));
+        var max = new Date(Math.max.apply(null, ends));
+        var rs = addDays(min, -((min.getDay() + 6) % 7));
+        var re = addDays(max, 6 - ((max.getDay() + 6) % 7));
+        var days = diff(rs, re) + 1;
+        var weeks = days / 7;
+
+        gantt.style.minWidth = '';
+        gantt.style.setProperty('--days', days);
+        gantt.style.setProperty('--weeks', weeks);
+
+        // header
+        var head = el('div', 'g-head');
+        head.appendChild(el('div', 'g-corner', 'Task'));
+        var right = el('div');
+        var wk = el('div', 'g-weeks');
+        for (var w = 0; w < weeks; w++) {
+          var a = addDays(rs, w * 7), b = addDays(a, 6);
+          wk.appendChild(el('div', 'g-wk', fmt(a) + ' \u2013 ' + (a.getMonth() === b.getMonth() ? b.getDate() : fmt(b))));
+        }
+        var dy = el('div', 'g-days');
+        for (var i = 0; i < days; i++) {
+          var d = addDays(rs, i);
+          var c = el('div', 'g-day' + (d.getDay() === 0 || d.getDay() === 6 ? ' wk' : '') + (diff(now, d) === 0 ? ' today' : ''));
+          c.appendChild(el('small', null, WD[d.getDay()]));
+          c.appendChild(el('b', null, String(d.getDate())));
+          dy.appendChild(c);
+        }
+        right.appendChild(wk); right.appendChild(dy);
+        head.appendChild(right);
+        gantt.appendChild(head);
+
+        // body
+        var body = el('div', 'g-body');
+        var grid = el('div', 'g-grid');
+        for (var j = 0; j < days; j++) {
+          var dd = addDays(rs, j);
+          var cell = el('div', (dd.getDay() === 0 || dd.getDay() === 6 ? 'wk' : '') + (diff(now, dd) === 0 ? ' today' : ''));
+          grid.appendChild(cell);
+        }
+        var offset = diff(rs, now);
+        if (offset >= 0 && offset < days) {
+          var line = el('div', 'g-todayline');
+          line.style.left = ((offset + 0.5) / days * 100) + '%';
+          grid.appendChild(line);
+        }
+        body.appendChild(grid);
+
+        // group by phase (in PHASES order, then any unknown phase names)
+        var order = PHASES.map(function (p) { return p.name; });
+        tasks.forEach(function (t) { if (order.indexOf(t.phase) === -1) order.push(t.phase); });
+
+        order.forEach(function (ph) {
+          var list = tasks.filter(function (t) { return t.phase === ph; });
+          if (!list.length) return;
+          list.sort(function (a, b) { return pd(a.start) - pd(b.start) || pd(a.end) - pd(b.end); });
+          var col = phaseColor(ph);
+
+          var prow = el('div', 'g-row phase');
+          prow.style.setProperty('--c', col);
+          prow.style.setProperty('--tint-solid', 'color-mix(in srgb, ' + col + ' 14%, #ffffff)');
+          var pl = el('div', 'g-label');
+          pl.appendChild(el('i'));
+          pl.appendChild(document.createTextNode(ph));
+          prow.appendChild(pl);
+          prow.appendChild(el('div', 'g-track'));
+          body.appendChild(prow);
+
+          list.forEach(function (t) {
+            var st = status(t, now);
+            var row = el('div', 'g-row');
+            row.setAttribute('role', 'row');
+
+            var lab = el('div', 'g-label');
+            lab.appendChild(el('span', 'nm', t.name));
+            var sub = el('span', 'sub');
+            sub.appendChild(el('span', 'chip ' + st.key, st.label));
+            var one = t.start === t.end;
+            sub.appendChild(el('span', null, (one ? fmt(pd(t.start)) : fmt(pd(t.start)) + ' \u2013 ' + fmt(pd(t.end))) + ' \u00b7 ' + t.pct + '%'));
+            lab.appendChild(sub);
+            row.appendChild(lab);
+
+            var track = el('div', 'g-track');
+            var s = diff(rs, pd(t.start));
+            var len = diff(pd(t.start), pd(t.end)) + 1;
+            var bar = el('button', 'g-bar' + (t.pct >= 100 ? ' done' : ''));
+            bar.type = 'button';
+            bar.style.setProperty('--c', col);
+            bar.style.left = 'calc(' + (s / days * 100) + '% + 2px)';
+            bar.style.width = 'calc(' + (len / days * 100) + '% - 4px)';
+            bar.title = t.name + '\n' + fmt(pd(t.start)) + ' to ' + fmt(pd(t.end)) + '\n' + t.pct + '% complete';
+            bar.setAttribute('aria-label', t.name + ', ' + t.pct + ' percent complete, ' + fmt(pd(t.start)) + ' to ' + fmt(pd(t.end)));
+            var fill = el('span', 'fill'); fill.style.width = t.pct + '%';
+            bar.appendChild(fill);
+            if (len >= 4) bar.appendChild(el('span', 'txt', t.pct + '%'));
+            bar.addEventListener('click', function () { if (root.classList.contains('editing')) openEditor(t.id); });
+            track.appendChild(bar);
+            row.appendChild(track);
+            body.appendChild(row);
+          });
+        });
+
+        gantt.appendChild(body);
+      }
+
+      // ---------- editor ----------
+      function fillPhases(selected) {
+        fPhase.innerHTML = '';
+        PHASES.forEach(function (p) {
+          var o = el('option', null, p.name); o.value = p.name;
+          if (p.name === selected) o.selected = true;
+          fPhase.appendChild(o);
+        });
+      }
+      function openEditor(id) {
+        editingId = id;
+        fErr.textContent = '';
+        var t = null;
+        for (var i = 0; i < tasks.length; i++) if (tasks[i].id === id) t = tasks[i];
+        if (t) {
+          document.getElementById('tl-dialog-title').textContent = 'Edit task';
+          fName.value = t.name; fillPhases(t.phase);
+          fStart.value = t.start; fEnd.value = t.end; fPct.value = t.pct;
+          fDelete.style.display = '';
+        } else {
+          var n = iso(today());
+          document.getElementById('tl-dialog-title').textContent = 'Add task';
+          fName.value = ''; fillPhases(PHASES[0].name);
+          fStart.value = n; fEnd.value = n; fPct.value = 0;
+          fDelete.style.display = 'none';
+        }
+        fPctOut.textContent = fPct.value + '%';
+        if (dlg.showModal) dlg.showModal(); else dlg.setAttribute('open', '');
+        fName.focus();
+      }
+      function closeEditor() { if (dlg.close) dlg.close(); else dlg.removeAttribute('open'); }
+
+      fPct.addEventListener('input', function () { fPctOut.textContent = fPct.value + '%'; });
+      Array.prototype.forEach.call(dlg.querySelectorAll('.quick button'), function (b) {
+        b.addEventListener('click', function () { fPct.value = b.getAttribute('data-pct'); fPctOut.textContent = fPct.value + '%'; });
+      });
+      document.getElementById('f-cancel').addEventListener('click', closeEditor);
+
+      form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        var name = fName.value.trim();
+        if (!name) { fErr.textContent = 'Give the task a name.'; return; }
+        if (!fStart.value || !fEnd.value) { fErr.textContent = 'Pick a start and end date.'; return; }
+        if (pd(fEnd.value) < pd(fStart.value)) { fErr.textContent = 'End date has to be on or after the start date.'; return; }
+        var pct = Math.max(0, Math.min(100, parseInt(fPct.value, 10) || 0));
+        var found = null;
+        for (var i = 0; i < tasks.length; i++) if (tasks[i].id === editingId) found = tasks[i];
+        if (found) {
+          found.name = name; found.phase = fPhase.value; found.start = fStart.value; found.end = fEnd.value; found.pct = pct;
+        } else {
+          tasks.push({ id: 't' + Date.now(), name: name, phase: fPhase.value, start: fStart.value, end: fEnd.value, pct: pct });
+        }
+        save(); render(); closeEditor();
+      });
+
+      fDelete.addEventListener('click', function () {
+        if (!confirm('Delete this task?')) return;
+        tasks = tasks.filter(function (t) { return t.id !== editingId; });
+        save(); render(); closeEditor();
+      });
+
+      // click on the dark backdrop closes the dialog
+      dlg.addEventListener('click', function (e) { if (e.target === dlg) closeEditor(); });
+
+      // ---------- toolbar ----------
+      editToggle.addEventListener('change', function () {
+        root.classList.toggle('editing', editToggle.checked);
+      });
+      document.getElementById('tl-add').addEventListener('click', function () { openEditor(null); });
+      document.getElementById('tl-reset').addEventListener('click', function () {
+        if (!confirm('Reset the timeline back to the original plan? Your edits in this browser will be lost.')) return;
+        tasks = clone(DEFAULT_TASKS);
+        try { localStorage.removeItem(STORE_KEY); } catch (e) {}
+        render();
+      });
+      document.getElementById('tl-export').addEventListener('click', function (e) {
+        var btn = e.currentTarget;
+        var out = 'var DEFAULT_TASKS = [\n' + tasks.map(function (t) {
+          return '  ' + JSON.stringify(t);
+        }).join(',\n') + '\n];';
+        function done() { var o = btn.textContent; btn.textContent = 'Copied!'; setTimeout(function () { btn.textContent = o; }, 1500); }
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(out).then(done, function () { window.prompt('Copy this:', out); });
+        } else { window.prompt('Copy this:', out); }
+      });
+
+      // keep "today" fresh if the tab stays open past midnight
+      setInterval(function () {
+        var n = iso(today());
+        if (n !== render.last) { render.last = n; render(); }
+      }, 60000);
+      render.last = iso(today());
+
+      renderLegend();
+      render();
     })();
   </script>
 </body>
